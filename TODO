@@ -1,0 +1,21 @@
+TODO
+---- 
+
+- first run opens an info dialog and config dialog
+- Fix panel colors for Java 6
+- Some dirs under windows are not writable (why ?)
+
+- mixer volumes
+-------------------------------------------
+future:
+
+- turn text fields to editable comboboxes
+- add combobox
+- add it to setEditRec
+- checkbox beside soundcards
+- search for other possible event for triggering xmlWriter
+
+- icon in frame and children windows
+- animation when recording
+
+? interrupt alis-test-card.sh via gui

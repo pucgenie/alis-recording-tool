@@ -1,0 +1,129 @@
+0.7.0 (20061204)
+----------------
+
+- changed license to GPL v2 only
+- made the control panel tabbed
+- implemented recording using Java Sound API
+- lots of usability improvements and bug fixes
+- windows support (installer, icons, launcher and native look)
+- linux support (launcher)
+- preliminary macosx support (native look)
+- recording path for choosing where to save files
+- preferences are now saved for each user seperatively
+- better unicode support in xml files
+- hall of fame tab in about dialog
+
+
+0.6.1 (20060502)
+----------------
+
+- finalize metadata editing
+- support startTime in xml when updating/editing recording
+- support stopTime in xml when updating/editing recording
+
+
+0.6.0 (20060417)
+----------------
+
+- when pressing start do: refresh list and autoselect the current temp recording
+- when a recording is selected from the list, feed it's path to the xmlOut logic
+- when nothing's selected, disable that form
+- only enable it if exactly one recording is selected
+- alis.xml should be saved under this path
+- selecting the _temp recording should not enable the delete buton
+- sort recordings list
+- add the same selectionListener of recsList to cardsList
+- write empty dtd and xml files at the beginning of the recording
+- when selecting a recording from the list, load the contents of the xml in the form
+- when not editing recording, clear text fields
+- when stop button is pressed, auditorium and seminar are read from xml and not from the form
+- get rid of the save button
+- get constant parts of xml and refeed them to it when saving via keyReleased
+- don't allow exiting while recording is in progress
+- confirmation for stop
+- update thanks in about dialog
+- detect soundcards defines maximum number for the spinner
+- put timestamp right after name prefix
+- put speaker's name on recording filenames
+- rewrite XMLHandler
+- loadxml
+- savexml
+- xmlWriter for null
+- xmlWriter for selected
+- getElement goes private
+- support stopTime in xml when stopping recording
+- replace these chars & < >  with nothing in xml editing
+- for renaming replace all special chars with nothing, and space char with underscore
+- Version tagging
+
+
+20060406
+--------
+
+- implemented AlisFilenameFilter
+- implemented AlisProperties
+- implemented AlisPathHandler
+- implemented AlisCommons
+- implemented AlisConfigDialog
+- implemented AlisAboutDialog
+- got rid of that ugly huge silence.wav
+- implemented a new way to test a card (by recording to /dev/null)
+- use better grep regexp pattern in scripts
+- when adding soundcards, check if there are options saved for them, and if not, do add them
+- when starting recording use only the soundcards that have a configured alsa id
+- card edit fields by default not editable
+- changing spinner disables card edit
+- stop button disables delete button
+- Remove "Edit card" save button
+- icon for Detect SoundCards
+
+
+20060403
+--------
+
+- implemented getPath() for system-independent pathfinder
+- present a listing from arecord -l in configDialog
+- add button to test soundcard playback
+- confirmation dialog when quiting
+- button Apply in config dialog
+- button Quit in main window
+- redesigned about dialog
+- GUI beautification changes
+- use Nuvola Icon Theme
+- added license notice for application and icons
+- optimized configuration options
+
+
+20060328
+--------
+
+- Saved Recordings List
+- Delete Saved Recordings Button
+- Configuration Dialog for SoundCards
+- Auto SoundCard detection Button
+- new bash script for the above button's functioning
+- configuration options for each sound card
+- storing configuration options in the properties file
+
+
+20060324
+--------
+
+- Include Alis Recording scripts in the Alis Recording Tool source code
+- Applied 2>&1 patch suggested by Michael
+- bugfix for alis-stop-record.sh: kill arecord before renaming files
+- bugfix for alis-stop-record.sh: call pidof using it's full path
+- Add two textfields in the GUI: Seminar and Auditorium
+- Add functionality for Start, Stop, save buttons (in current Recording panel)
+- Start button executes alis-start-record.sh, disables itself and enables stop button
+- Stop button executes alis-stop-record.sh, disables itself and enables start button
+- Save button saves in outfilename.txt (temporarily till XML Metadata handling is in place)
+- Make use of a Properties for storing/reading options
+- Adapted build.xml to copy the scripts and the properties file in dist output folder
+
+
+20060320
+--------
+
+- Initial GUI design by Alexis
+

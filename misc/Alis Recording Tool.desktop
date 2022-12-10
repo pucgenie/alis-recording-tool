@@ -1,0 +1,19 @@
+[Desktop Entry]
+Comment=
+Comment[en_US]=
+Encoding=UTF-8
+Exec=/usr/lib/j2sdk1.5-sun/bin/java -jar "/home/alis/alis/AlisRecording.jar"
+GenericName=
+GenericName[en_US]=
+Icon=
+MimeType=
+Name=Alis Recording Tool
+Name[en_US]=Alis Recording Tool
+Path=
+StartupNotify=true
+Terminal=false
+TerminalOptions=
+Type=Application
+X-DCOP-ServiceType=
+X-KDE-SubstituteUID=false
+X-KDE-Username=
