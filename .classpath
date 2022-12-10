@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry excluding="java-sound/MyMp3Recorder/|java-sound/MyRecorder/|java-sound/SimpleMp3Recorder/" kind="src" path="misc"/>
+	<classpathentry kind="src" path="misc/java-sound/MyMp3Recorder"/>
+	<classpathentry kind="src" path="misc/java-sound/MyRecorder"/>
+	<classpathentry kind="src" path="misc/java-sound/SimpleMp3Recorder"/>
+	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="lib" path="lib/tritonus_mp3-0.3.6.jar"/>
+	<classpathentry kind="lib" path="lib/tritonus_share-0.3.6.jar"/>
+	<classpathentry kind="output" path="bin"/>
+</classpath>
