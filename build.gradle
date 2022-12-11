@@ -1,0 +1,54 @@
+plugins {
+	id 'application'
+	id 'org.springframework.boot' version '3.0.0'
+	id 'io.spring.dependency-management' version '1.1.0'
+	//id 'io.freefair.aspectj.post-compile-weaving' version '5.3.0'
+}
+
+group = 'net.alis.recorder'
+version = '0.0.1-SNAPSHOT'
+sourceCompatibility = '17'
+targetCompatibility = '17'
+
+configurations {
+	compileOnly {
+		extendsFrom annotationProcessor
+	}
+}
+
+repositories {
+	mavenCentral()
+}
+
+dependencies {
+	implementation 'org.swinglabs:swing-layout:1.0.3'
+	//implementation 'com.oliphantllc:swing-layout:1.0.3' // wrongly packaged
+	
+
+	implementation 'org.springframework.boot:spring-boot-starter-aop' // TODO: wait for aspectj plugin
+	
+	// TODO: implement notifications
+	//implementation 'org.springframework.boot:spring-boot-starter-websocket'
+	// multi-language support framework
+	implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
+	// TODO: is it needed besides starter-hateoas?
+	//implementation 'org.springframework.data:spring-data-rest-webmvc'
+	//implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+	
+//	testImplementation 'com.jayway.jsonpath:json-path'
+	
+	// we use SnakeYAML instead
+	//testCompile 'com.fasterxml.jackson.dataformat:jackson-dataformat-yaml'
+	// no database yet
+	//runtimeOnly 'org.postgresql:postgresql'
+	// syntactic sugar
+	compileOnly 'org.projectlombok:lombok'
+	annotationProcessor 'org.projectlombok:lombok'
+	testImplementation('org.springframework.boot:spring-boot-starter-test') {
+		exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
+	}
+}
+
+test {
+	useJUnitPlatform()
+}

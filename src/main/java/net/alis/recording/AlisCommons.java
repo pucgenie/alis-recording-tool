@@ -17,14 +17,15 @@
  *   Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-package alisrecording;
+package net.alis.recording;
 
-import alisrecording.AlisPathHandler;
 import java.io.File;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import net.alis.recording.AlisPathHandler;
 
 /**
  *

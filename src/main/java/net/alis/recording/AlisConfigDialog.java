@@ -17,16 +17,17 @@
  *   Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-package alisrecording;
+package net.alis.recording;
 
-import alisrecording.AlisCommons;
-import alisrecording.AlisProperties;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
 import javax.swing.DefaultListModel;
 import javax.swing.SpinnerModel;
 import javax.swing.SpinnerNumberModel;
+
+import net.alis.recording.AlisCommons;
+import net.alis.recording.AlisProperties;
 
 /**
  *

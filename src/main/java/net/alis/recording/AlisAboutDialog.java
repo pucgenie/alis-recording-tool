@@ -17,9 +17,8 @@
  *   Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-package alisrecording;
+package net.alis.recording;
 
-import alisrecording.AlisCommons;
 import javax.swing.text.SimpleAttributeSet;
 import javax.swing.text.StyleConstants;
 
@@ -447,7 +446,7 @@ public class AlisAboutDialog extends javax.swing.JDialog {
         thanksTextPane.setBackground(javax.swing.UIManager.getDefaults().getColor("Button.background"));
         thanksTextPane.setBorder(null);
         thanksTextPane.setEditable(false);
-        thanksTextPane.setFont(new java.awt.Font("Dialog", 1, 12));
+        thanksTextPane.setFont(new java.awt.Font("Dialog", java.awt.Font.BOLD, 12));
 
         org.jdesktop.layout.GroupLayout jPanel10Layout = new org.jdesktop.layout.GroupLayout(jPanel10);
         jPanel10.setLayout(jPanel10Layout);

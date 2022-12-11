@@ -17,12 +17,8 @@
  *   Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-package alisrecording;
+package net.alis.recording;
 
-import alisrecording.AlisCommons;
-import alisrecording.AlisProperties;
-import alisrecording.AlisSound;
-import alisrecording.AlisSoundMemoryRecorder;
 import java.awt.Component;
 import java.io.File;
 import java.io.IOException;
@@ -35,6 +31,12 @@ import javax.swing.DefaultListModel;
 import javax.swing.JFileChooser;
 import javax.swing.SpinnerModel;
 import javax.swing.SpinnerNumberModel;
+
+import net.alis.recording.AlisCommons;
+import net.alis.recording.AlisProperties;
+import net.alis.recording.AlisSound;
+import net.alis.recording.AlisSoundMemoryRecorder;
+
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 

@@ -17,15 +17,8 @@
  *   Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-package alisrecording;
+package net.alis.recording;
 
-import alisrecording.AlisCommons;
-import alisrecording.AlisAboutDialog;
-import alisrecording.AlisConfigDialog;
-import alisrecording.AlisConfigDialog2;
-import alisrecording.AlisProperties;
-import alisrecording.AlisFilenameFilter;
-import alisrecording.AlisXMLHandler;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
@@ -42,6 +35,14 @@ import javax.swing.DefaultListModel;
 import javax.swing.JOptionPane;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
+
+import net.alis.recording.AlisAboutDialog;
+import net.alis.recording.AlisCommons;
+import net.alis.recording.AlisConfigDialog;
+import net.alis.recording.AlisConfigDialog2;
+import net.alis.recording.AlisFilenameFilter;
+import net.alis.recording.AlisProperties;
+import net.alis.recording.AlisXMLHandler;
 
 /**
  *
