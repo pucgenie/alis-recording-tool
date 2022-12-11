@@ -31,15 +31,14 @@ public class AlisPathHandler {
     /**
      *  This method tries to find a path containing locator
      */
-    public static String getPath(String locator) {
+    public static File getPath(String locator) {
         String classpath = System.getProperty("java.class.path");
         StringTokenizer tok = new StringTokenizer(classpath, System.getProperty("path.separator"));
         
-        String path = null;
         String pathseparator = System.getProperty("file.separator");
         
         while (tok.hasMoreTokens()) {
-            path = tok.nextToken();
+            String path = tok.nextToken();
             if (path.toLowerCase().endsWith(".jar") ) {
                 int seppos = path.lastIndexOf(pathseparator);
                 if (seppos>=0) path = path.substring(0, seppos);
@@ -49,17 +48,18 @@ public class AlisPathHandler {
             if (!path.endsWith(pathseparator)) path = path + pathseparator;
             
             // try to find our locator
-            boolean exists = (new File(path + locator)).exists();
+            final var file = new File(path + locator);
+			boolean exists = file.exists();
             if (exists) {
-                return path;
+                return file;
             }
             
         }
         
         // if everything else failed, try 'pwd' as the last resort
-        boolean exists = (new File(System.getProperty("user.dir") + pathseparator + locator)).exists();
+        boolean exists = (new File(System.getProperty("user.dir"), locator)).exists();
         if (exists) {
-            return System.getProperty("user.dir") + pathseparator;
+            return new File(System.getProperty("user.dir"));
         }
         
         return null;

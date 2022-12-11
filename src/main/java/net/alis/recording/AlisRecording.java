@@ -19,10 +19,7 @@
 
 package net.alis.recording;
 
-import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileWriter;
-import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.text.Format;
@@ -31,18 +28,13 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.Timer;
 import java.util.TimerTask;
+
+import javax.sound.sampled.LineUnavailableException;
 import javax.swing.DefaultListModel;
 import javax.swing.JOptionPane;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
-
-import net.alis.recording.AlisAboutDialog;
-import net.alis.recording.AlisCommons;
-import net.alis.recording.AlisConfigDialog;
-import net.alis.recording.AlisConfigDialog2;
-import net.alis.recording.AlisFilenameFilter;
-import net.alis.recording.AlisProperties;
-import net.alis.recording.AlisXMLHandler;
+import javax.xml.parsers.ParserConfigurationException;
 
 /**
  *
@@ -50,10 +42,11 @@ import net.alis.recording.AlisXMLHandler;
  */
 public class AlisRecording extends javax.swing.JFrame {
     
-    private String recTempDir;
+    private static final long serialVersionUID = -6318392042915812236L;
+	private File recTempDir;
     private String recTempTimeStamp;
     
-    private DefaultListModel modelRecordings;
+    private DefaultListModel<String> modelRecordings;
     
     private AlisAboutDialog aboutDialog;
     private AlisConfigDialog2 configDialog;
@@ -84,7 +77,7 @@ public class AlisRecording extends javax.swing.JFrame {
     }
     
     private void initLists() {
-        modelRecordings = new DefaultListModel();
+        modelRecordings = new DefaultListModel<>();
         recsList.setModel(modelRecordings);
         
         refreshRecsList();
@@ -126,21 +119,23 @@ public class AlisRecording extends javax.swing.JFrame {
     }
     
     private void refreshRecsList() {
-        String recordpath = AlisCommons.getRecordPath();
-        File dir = new File(recordpath);
-        
-        if (dir.exists()) {
-            FilenameFilter filter = new AlisFilenameFilter(AlisCommons.recDirPrefix);
+        AlisCommons.getRecordPath().filter(File::exists).ifPresent(dir -> {
+            var filter = new AlisFilenameFilter(AlisCommons.recDirPrefix);
 
-            String[] children = dir.list(filter);
+            var children = dir.list(filter);
+            // pucgenie: Is it necessary?
             Arrays.sort(children);
 
             modelRecordings.clear();
-            for (int i=0; i<children.length; i++) {
-                int pos = recsList.getModel().getSize();
-                modelRecordings.add(pos, children[i]);
-            }
-        }
+            // pucgenie: I want to access java.util.ImmutableCollections.ListN<E> (zero-copy references) :'(
+            modelRecordings.addAll(java.util.List.of(children));
+            
+            // pucgenie: Fires intervalAdded for every element -.-
+            //for (var child : children) {
+            //    int pos = recsList.getModel().getSize();
+            //    modelRecordings.add(pos, child);
+            //}
+        });
     }
     
     private void refreshRecsListUntil(String found) {
@@ -185,12 +180,6 @@ public class AlisRecording extends javax.swing.JFrame {
         currentCommentsArea.setText(alisxml.comments);
     }
     
-    private static boolean makeDir(String dir) {
-        boolean success = (new File(dir)).mkdir();
-        
-        return success;
-    }
-    
     private static boolean deleteDir(File dir) {
         if (dir.isDirectory()) {
             String[] children = dir.list();
@@ -204,28 +193,8 @@ public class AlisRecording extends javax.swing.JFrame {
         return dir.delete();
     }
     
-    private static boolean deleteDir(String dir) {
-        return deleteDir(new File(dir));
-    }
-    
-    private static boolean renameFileorDir(String fileold, String filenew) {
-        if (filenew.length() > 255) {
-            filenew = filenew.substring(0, 254);
-        }
-        
-        File file = new File(fileold);
-        File file2 = new File(filenew);
-        
-        boolean success = file.renameTo(file2);
-        return success;
-    }
-    
     public static void main(String args[]) {
-        java.awt.EventQueue.invokeLater(new Runnable() {
-            public void run() {
-                new AlisRecording().setVisible(true);
-            }
-        });
+        java.awt.EventQueue.invokeLater(() -> new AlisRecording().setVisible(true));
     }
     
     // <editor-fold defaultstate="collapsed" desc=" Generated Code ">//GEN-BEGIN:initComponents
@@ -233,7 +202,7 @@ public class AlisRecording extends javax.swing.JFrame {
         jPanel3 = new javax.swing.JPanel();
         jPanel1 = new javax.swing.JPanel();
         jScrollPane1 = new javax.swing.JScrollPane();
-        recsList = new javax.swing.JList();
+        recsList = new javax.swing.JList<>();
         recsReloadButton = new javax.swing.JButton();
         recsDelButton = new javax.swing.JButton();
         jPanel2 = new javax.swing.JPanel();
@@ -269,11 +238,7 @@ public class AlisRecording extends javax.swing.JFrame {
         });
 
         jPanel1.setBorder(javax.swing.BorderFactory.createTitledBorder(javax.swing.BorderFactory.createEtchedBorder(), "Saved Recordings"));
-        recsList.addListSelectionListener(new javax.swing.event.ListSelectionListener() {
-            public void valueChanged(javax.swing.event.ListSelectionEvent evt) {
-                recsListValueChanged(evt);
-            }
-        });
+        recsList.addListSelectionListener(this::recsListValueChanged);
 
         jScrollPane1.setViewportView(recsList);
 
@@ -464,11 +429,7 @@ public class AlisRecording extends javax.swing.JFrame {
         stopButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icons/player_stop.png")));
         stopButton.setToolTipText("Stop Recording");
         stopButton.setEnabled(false);
-        stopButton.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                stopButtonActionPerformed(evt);
-            }
-        });
+        stopButton.addActionListener(this::stopButtonActionPerformed);
 
         org.jdesktop.layout.GroupLayout jPanel4Layout = new org.jdesktop.layout.GroupLayout(jPanel4);
         jPanel4.setLayout(jPanel4Layout);
@@ -619,8 +580,16 @@ public class AlisRecording extends javax.swing.JFrame {
         
             if (selectedIx.length == 1) {
                 setEditRec(true);
-                selectedXML = new AlisXMLHandler(recsList.getSelectedValue().toString());
-                setEditRec(selectedXML);
+                try {
+					selectedXML = new AlisXMLHandler(recsList.getSelectedValue());
+					setEditRec(selectedXML);
+				} catch (ParserConfigurationException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
             }
             else {
                 setEditRec(false);
@@ -650,9 +619,9 @@ public class AlisRecording extends javax.swing.JFrame {
     }//GEN-LAST:event_configButtonActionPerformed
 
     private void recsDelButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_recsDelButtonActionPerformed
-        int[] selectedIx = recsList.getSelectedIndices();
+        var selectedIx = recsList.getSelectedIndices();
         
-        if (selectedIx.length <= 0) {
+        if (selectedIx.length == 0) {
             return;
         }
         
@@ -660,34 +629,36 @@ public class AlisRecording extends javax.swing.JFrame {
         int answer = JOptionPane.showConfirmDialog(this, message, 
                 "Delete Confirmation", JOptionPane.YES_NO_OPTION, 
                 JOptionPane.WARNING_MESSAGE, 
-                (new javax.swing.ImageIcon(getClass().getResource("/icons/messagebox_warning.png")))
+                new javax.swing.ImageIcon(getClass().getResource("/icons/messagebox_warning.png"))
                 );
         if (answer != JOptionPane.YES_OPTION) {
             return;
         }
         
         int removed = 0;
-        Object item;
-        
-        for (int i=0; i<selectedIx.length; i++) {
-            item = modelRecordings.get(selectedIx[i]-removed);
-            // Delete Directory with recording
-            String recordpath = AlisCommons.getRecordPath();
-            boolean success = deleteDir(new File(recordpath + item.toString()));
-            if(success) {
-                System.out.println("Deleted Directory: " + recordpath + item.toString());
-                modelRecordings.remove(selectedIx[i]-removed);
-                removed++;
-            }
+	    try {
+	        var recordpath = AlisCommons.getRecordPath().orElseThrow();
+	        for (int i=0; i<selectedIx.length; i++) {
+	            String item = modelRecordings.get(selectedIx[i]-removed);
+	            // Delete Directory with recording
+	            boolean success = deleteDir(new File(recordpath, item.toString()));
+	            if(success) {
+	                System.out.println("Deleted Directory: " + recordpath + item.toString());
+	                modelRecordings.remove(selectedIx[i]-removed);
+	                removed++;
+	            }
+	        }
+        } catch (java.util.NoSuchElementException nseex) {
+        	System.err.println("RecordPath vanished. wtf");
         }
         
         recsDelButton.setEnabled(false);
     }//GEN-LAST:event_recsDelButtonActionPerformed
     
     private void stopButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_stopButtonActionPerformed
-        String recordmethod = AlisProperties.loadProps().getProperty(AlisCommons.recordMethod, 
+        var recordmethod = AlisProperties.loadProps().getProperty(AlisCommons.recordMethod, 
                 AlisCommons.recordMethodJava);
-        String message = "Do you really want to stop recording ?";    
+        var message = "Do you really want to stop recording ?";    
         int answer = JOptionPane.showConfirmDialog(this, message, 
                 "Stop Recording Confirmation", 
                 JOptionPane.YES_NO_OPTION, 
@@ -698,78 +669,87 @@ public class AlisRecording extends javax.swing.JFrame {
             return;
         }        
         
-        AlisXMLHandler alisxml = new AlisXMLHandler(AlisCommons.recTempPrefix + recTempTimeStamp);
-        Date date = new Date();
-        Format formatter = new SimpleDateFormat(AlisCommons.dateFormat);
-        alisxml.stopTime = formatter.format(date);
-        alisxml.xmlWriter();
+        AlisXMLHandler alisxml;
+		try {
+			alisxml = new AlisXMLHandler(AlisCommons.recTempPrefix + recTempTimeStamp);var date = new Date();
+	        var formatter = new SimpleDateFormat(AlisCommons.dateFormat);
+	        alisxml.stopTime = formatter.format(date);
+	        alisxml.xmlWriter();
+	        
+	        if (recordmethod.equals(AlisCommons.recordMethodJava)) {
+	            var recordpath = AlisCommons.getRecordPath().orElseThrow();
+	            var recDir = new File(recordpath, AlisCommons.recDirPrefix + recTempTimeStamp);
+	            
+	            for (int i=0; i<reclinesArr.length; i++) {
+	                if (reclinesArr[i] != null) {
+	                    reclinesArr[i].stopRecording();
+	                    long delayMillis = 5000;
+	                    try {
+	                        reclinesArr[i].join(delayMillis); // wait 5 seconds for the thread to end
+	                    } catch (InterruptedException ex) {
+	                        ex.printStackTrace();
+	                    }
+	                }
+	            }
+	            
+	            String audit = AlisXMLHandler.escapeXMLforFilename(alisxml.audit);
+	            String seminar = AlisXMLHandler.escapeXMLforFilename(alisxml.seminar);
+	            
+	            if (audit.length() > 0) {
+	            	recDir = new File(recDir.getParent(), recDir.getName() + "_" + audit);
+	            }
+	            
+	            if (seminar.length() > 0) {
+	            	recDir = new File(recDir.getParent(), recDir.getName() + "_" + seminar);
+	            }
+	            
+	            recTempDir.renameTo(recDir);
+	        }
+	        else if (recordmethod.equals(AlisCommons.recordMethodAlsa)) {
+	            var commands = new String[]{
+	            		AlisCommons.mainPath.getAbsolutePath() + File.separator + AlisCommons.scriptsPath + AlisCommons.pathseparator + AlisCommons.recScriptStop, 
+	                "-d",
+	                recTempDir.getAbsolutePath(),
+	                "-t",
+	                recTempTimeStamp,
+	                "-s",
+	                AlisXMLHandler.escapeXMLforFilename(alisxml.seminar),
+	                "-a",
+	                AlisXMLHandler.escapeXMLforFilename(alisxml.audit),
+	                "-sp",
+	                AlisXMLHandler.escapeXMLforFilename(alisxml.speaker)
+	            };
+	
+	            try {
+	                Process child = Runtime.getRuntime().exec(commands);
+	                InputStream in = child.getInputStream();
+	                var buf = new byte[256];
+	                for (int n; (n = in.read(buf)) != 0;) {
+	                    System.out.write(buf, 0, n);
+	                }
+	                in.close();
+	            } catch (IOException ex) {
+	                ex.printStackTrace();
+	            }
+	        }
+	        
+	        startButton.setEnabled(true);
+	        stopButton.setEnabled(false);
+	        recsDelButton.setEnabled(false);
+	        configDialog.setPathEdit(true);
+	        
+	        timer.cancel();
+	        recordingLabel.setText("");
+	        
+	        refreshRecsList();
+		} catch (ParserConfigurationException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
         
-        if (recordmethod.equals(AlisCommons.recordMethodJava)) {
-            String recordpath = AlisCommons.getRecordPath();
-            String recDir = recordpath + AlisCommons.recDirPrefix + recTempTimeStamp;
-            
-            for (int i=0; i<reclinesArr.length; i++) {
-                if (reclinesArr[i] != null) {
-                    reclinesArr[i].stopRecording();
-                    long delayMillis = 5000;
-                    try {
-                        reclinesArr[i].join(delayMillis); // wait 5 seconds for the thread to end
-                    } catch (InterruptedException ex) {
-                        ex.printStackTrace();
-                    }
-                }
-            }
-            
-            String audit = alisxml.escapeXMLforFilename(alisxml.audit);
-            String seminar = alisxml.escapeXMLforFilename(alisxml.seminar);
-            
-            if (audit.length() > 0) {
-                recDir = recDir.concat("_" + audit);
-            }
-            
-            if (seminar.length() > 0) {
-                recDir = recDir.concat("_" + seminar);
-            }
-            
-            renameFileorDir(recTempDir, recDir);
-        }
-        else if (recordmethod.equals(AlisCommons.recordMethodAlsa)) {
-            String[] commands = new String[]{
-                AlisCommons.mainPath + AlisCommons.scriptsPath + AlisCommons.pathseparator + AlisCommons.recScriptStop, 
-                "-d",
-                recTempDir,
-                "-t",
-                recTempTimeStamp,
-                "-s",
-                alisxml.escapeXMLforFilename(alisxml.seminar),
-                "-a",
-                alisxml.escapeXMLforFilename(alisxml.audit),
-                "-sp",
-                alisxml.escapeXMLforFilename(alisxml.speaker)
-            };
-
-            try {
-                Process child = Runtime.getRuntime().exec(commands);
-                InputStream in = child.getInputStream();
-                int c;
-                while ((c = in.read()) != -1) {
-                    System.out.print((char)c);
-                }
-                in.close();
-            } catch (IOException ex) {
-                ex.printStackTrace();
-            }
-        }
-        
-        startButton.setEnabled(true);
-        stopButton.setEnabled(false);
-        recsDelButton.setEnabled(false);
-        configDialog.setPathEdit(true);
-        
-        timer.cancel();
-        recordingLabel.setText("");
-        
-        refreshRecsList();
     }//GEN-LAST:event_stopButtonActionPerformed
 
     private void aboutButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_aboutButtonActionPerformed
@@ -777,9 +757,8 @@ public class AlisRecording extends javax.swing.JFrame {
     }//GEN-LAST:event_aboutButtonActionPerformed
 
     private void startButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_startButtonActionPerformed
-        String recordmethod = AlisProperties.loadProps().getProperty(AlisCommons.recordMethod, 
+        var recordmethod = AlisProperties.loadProps().getProperty(AlisCommons.recordMethod, 
                 AlisCommons.recordMethodJava);
-        String recordpath = AlisCommons.getRecordPath();
         int err = AlisCommons.checkRecordPath();
         boolean ret = false;
         
@@ -833,7 +812,7 @@ public class AlisRecording extends javax.swing.JFrame {
         Format formatter = new SimpleDateFormat(AlisCommons.dateFormat);
         recTempTimeStamp = formatter.format(date);
 
-        recTempDir = recordpath + AlisCommons.recTempPrefix + recTempTimeStamp;
+        recTempDir = AlisCommons.getRecordPath().map(recordpath -> new File(recordpath, AlisCommons.recTempPrefix + recTempTimeStamp)).orElseThrow();
 
         if (recordmethod.equals(AlisCommons.recordMethodJava)) {
             int linesnum = 0, reallinesnum = 0;
@@ -857,7 +836,7 @@ public class AlisRecording extends javax.swing.JFrame {
             }
             
             if (linesnum != 0) {
-                makeDir(recTempDir);
+                recTempDir.mkdir();
                 // count the reallinesnum, only those which are properly configured
                 for (int i=1; i<=linesnum; i++) {
                     String lineID = AlisProperties.loadProps().getProperty("Line" + i + 
@@ -870,14 +849,19 @@ public class AlisRecording extends javax.swing.JFrame {
                     
                     
                     if (lineEnabled.equals("true") && AlisSound.mixerExists(lineIDnum, false)) {
-                        linesArr[reallinesnum] = new AlisSoundFileRecorder(
-                                recTempDir,
-                                lineIDnum,
-                                lineLang,
-                                recordin
-                                );
-                        linesArr[reallinesnum].start();
-                        reallinesnum++;
+                        try {
+							linesArr[reallinesnum] = new AlisSoundFileRecorder(
+							        recTempDir,
+							        lineIDnum,
+							        lineLang,
+							        recordin
+							        );
+	                        linesArr[reallinesnum].start();
+	                        reallinesnum++;
+						} catch (LineUnavailableException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
                     }
                 }
             }
@@ -925,10 +909,10 @@ public class AlisRecording extends javax.swing.JFrame {
                 return;
             }
 
-            String[] commands = new String[(2*realcardsnum)+3];
-            commands[0] = AlisCommons.mainPath + AlisCommons.scriptsPath + AlisCommons.pathseparator + AlisCommons.recScriptStart;
+            var commands = new String[(2*realcardsnum)+3];
+            commands[0] = AlisCommons.mainPath.getAbsolutePath() + File.separator + AlisCommons.scriptsPath + AlisCommons.pathseparator + AlisCommons.recScriptStart;
             commands[1] = "-d";
-            commands[2] = recTempDir;
+            commands[2] = recTempDir.getAbsolutePath();
             int realcardsptr = 0;
 
             for (int i=1; i<=cardsnum; i++) {
@@ -988,12 +972,20 @@ public class AlisRecording extends javax.swing.JFrame {
         refreshRecsListUntil(AlisCommons.recTempPrefix + recTempTimeStamp);
 
         AlisXMLHandler.dtdWriter(recTempDir);
-        AlisXMLHandler alisxml = new AlisXMLHandler(AlisCommons.recTempPrefix + recTempTimeStamp);
-        alisxml.startTime = recTempTimeStamp;
-        alisxml.xmlWriter();
-
-        this.recsList.setSelectedValue(AlisCommons.recTempPrefix + recTempTimeStamp, true);
-            
+        AlisXMLHandler alisxml;
+		try {
+			alisxml = new AlisXMLHandler(AlisCommons.recTempPrefix + recTempTimeStamp);
+			alisxml.startTime = recTempTimeStamp;
+	        alisxml.xmlWriter();
+	
+	        this.recsList.setSelectedValue(AlisCommons.recTempPrefix + recTempTimeStamp, true);
+		} catch (ParserConfigurationException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
     }//GEN-LAST:event_startButtonActionPerformed
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
@@ -1022,7 +1014,7 @@ public class AlisRecording extends javax.swing.JFrame {
     private javax.swing.JButton quitButton;
     private javax.swing.JLabel recordingLabel;
     private javax.swing.JButton recsDelButton;
-    private javax.swing.JList recsList;
+    private javax.swing.JList<String> recsList;
     private javax.swing.JButton recsReloadButton;
     private javax.swing.JButton startButton;
     private javax.swing.JButton stopButton;

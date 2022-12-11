@@ -46,11 +46,11 @@ public class AlisSoundFileRecorder extends Thread {
     private static final String mp3extension = ".mp3";
     private static final String wavextension = ".wav";
     
-    public AlisSoundFileRecorder(String recordpath, int lineID, String lineLang, String recordType) {
+    public AlisSoundFileRecorder(File recordpath, int lineID, String lineLang, String recordType) throws LineUnavailableException {
         String fileextension = null;
         AudioFormat	audioFormat = new AudioFormat(
                 AudioFormat.Encoding.PCM_SIGNED,
-                44100.0F, 16, 1, 2, 44100.0F, false);
+                48000.0F, 16, 1, 2, 48000.0F, false);
         
         DataLine.Info	info = new DataLine.Info(TargetDataLine.class, audioFormat);
         TargetDataLine	targetDataLine = null;
@@ -58,14 +58,10 @@ public class AlisSoundFileRecorder extends Thread {
         Mixer.Info[] aInfos = AudioSystem.getMixerInfo();
         Mixer.Info mixerInfo = aInfos[lineID];
         Mixer mixer = AudioSystem.getMixer(mixerInfo);
-        try {
-            targetDataLine = (TargetDataLine) mixer.getLine(info);
-            targetDataLine.open(audioFormat);
-        }
-        catch (LineUnavailableException e) {
-            e.printStackTrace();
-        }
-        
+
+        targetDataLine = (TargetDataLine) mixer.getLine(info);
+        targetDataLine.open(audioFormat);
+
         m_line = targetDataLine;
         m_audioInputStream = new AudioInputStream(targetDataLine);
         
@@ -89,7 +85,7 @@ public class AlisSoundFileRecorder extends Thread {
         else {
             filename = lineID + "-" + "line";
         }
-        m_outputFile = new File(recordpath + AlisCommons.pathseparator + filename + fileextension);
+        m_outputFile = new File(recordpath, filename + fileextension);
     }
     
     public void start() {
@@ -133,7 +129,7 @@ public class AlisSoundFileRecorder extends Thread {
     public static AudioInputStream getConvertedStream(
         AudioInputStream sourceStream,
         AudioFormat.Encoding targetEncoding)
-                throws Exception {
+                throws UnsupportedOperationException {
         AudioFormat sourceFormat = sourceStream.getFormat();
 
         // construct a converted stream
@@ -154,7 +150,7 @@ public class AlisSoundFileRecorder extends Thread {
         }
         targetStream = AudioSystem.getAudioInputStream(targetEncoding, sourceStream);
         if (targetStream == null) {
-            throw new Exception("conversion not supported");
+            throw new UnsupportedOperationException("conversion not supported");
         }
         return targetStream;
     }

@@ -22,10 +22,9 @@ package net.alis.recording;
 import java.io.File;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
+import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import net.alis.recording.AlisPathHandler;
 
 /**
  *
@@ -35,7 +34,7 @@ public class AlisCommons {
     
     public static final String scriptsPath = "scripts";
     public static final String libPath = "lib";
-    public static final String mainPath = AlisPathHandler.getPath(libPath);
+    public static final java.io.File mainPath = AlisPathHandler.getPath(libPath);
     public static final String homePath = System.getProperty("user.home");
     public static final String pathseparator = System.getProperty("file.separator");
     
@@ -83,40 +82,28 @@ public class AlisCommons {
         return outputStr;
     }
     
-    public static String getRecordPath() {
-        String recordpath = AlisProperties.loadProps().getProperty(AlisCommons.recPathProperty, "");
-        
-        if (!recordpath.equals("")) {
-            if (!recordpath.endsWith(AlisCommons.pathseparator)) {
-                recordpath = recordpath + AlisCommons.pathseparator;
-            }
-        }
-        
-        return recordpath;
+    public static Optional<File> getRecordPath() {
+        return Optional.ofNullable(AlisProperties.loadProps().getProperty(AlisCommons.recPathProperty)).map(File::new);
     }
     
+    /**
+     * Looks like Ali is a C-style programmer.
+     * @return
+     */
     public static int checkRecordPath() {
-        String recordpath = getRecordPath();
-        int err = 0;
+        var recordpath = getRecordPath().orElseThrow();
         
-        if (recordpath.equals("")) {
-            err = 1;
-            return err;
-        }
-        
-        boolean exists = (new File(recordpath)).exists();
+        boolean exists = recordpath.exists();
         if (!exists) {
-            err = 2;
-            return err;
+            return 2;
         }
         
-        boolean writable = (new File(recordpath)).canWrite();
+        boolean writable = recordpath.canWrite();
         if (!writable) {
-            err = 3;
-            return err;
+            return 3;
         }
         
-        return err;
+        return 0;
     }
     
     public static String formatSeconds(int seconds) {

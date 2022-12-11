@@ -19,26 +19,23 @@
 
 package net.alis.recording;
 
-import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.OutputStreamWriter;
+
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
+
 import org.w3c.dom.CharacterData;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
-
-import net.alis.recording.AlisCommons;
 
 /**
  *
@@ -47,8 +44,7 @@ import net.alis.recording.AlisCommons;
 public class AlisXMLHandler {
     private Document doc;
     
-    private String recFolder;
-    private String xmlFullpath;
+    private File xmlfile;
     public String audit;
     public String seminar;
     public String language;
@@ -58,14 +54,10 @@ public class AlisXMLHandler {
     public String startTime;
     public String stopTime;
     
-    public AlisXMLHandler(String recFolder) {
-        this.recFolder = recFolder;
-        String recordpath = AlisCommons.getRecordPath();
-        xmlFullpath = recordpath + recFolder + 
-                AlisCommons.pathseparator + AlisCommons.currentMetadata;
-        
-        File xmlfile = new File(xmlFullpath);
-        
+    public AlisXMLHandler(String recFolder) throws ParserConfigurationException, IOException {
+        var recordpath = AlisCommons.getRecordPath();
+        xmlfile = recordpath.map(path -> new File(path, recFolder + 
+                AlisCommons.pathseparator + AlisCommons.currentMetadata)).orElseThrow();
         
         boolean exists = xmlfile.exists();
         if (!exists) {
@@ -85,37 +77,21 @@ public class AlisXMLHandler {
             xmlWriter();
         }
         
-        DocumentBuilder builder = null;
+        DocumentBuilder builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
         
-        try {
-            builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
-        } catch (ParserConfigurationException ex) {
-            ex.printStackTrace();
-        }
-        
-        InputStream is = null;
-        try {
-            is = new FileInputStream(xmlfile);
-        } catch (FileNotFoundException ex) {
-            ex.printStackTrace();
-        }
-        
-        try {
+        try (var is = new FileInputStream(xmlfile)) {
             doc = builder.parse(is);
-            is.close();
-            speaker = getElement("synedrio", "speaker");
-            language = getElement("synedrio", "language");
-            seminar = getElement("synedrio", "seminar");
-            audit = getElement("synedrio", "auditorium");
-            keywds = getElement("synedrio", "keywords");
-            comments = getElement("synedrio", "comments");
-            startTime = getElement("synedrio", "starttime");
-            stopTime = getElement("synedrio", "stoptime");
         } catch (SAXException ex) {
             ex.printStackTrace();
-        } catch (IOException ex) {
-            ex.printStackTrace();
         }
+        speaker = getElement("synedrio", "speaker");
+        language = getElement("synedrio", "language");
+        seminar = getElement("synedrio", "seminar");
+        audit = getElement("synedrio", "auditorium");
+        keywds = getElement("synedrio", "keywords");
+        comments = getElement("synedrio", "comments");
+        startTime = getElement("synedrio", "starttime");
+        stopTime = getElement("synedrio", "stoptime");
     }
     
     private String getElement(String... args) {
@@ -141,7 +117,7 @@ public class AlisXMLHandler {
         return out;
     }
     
-    public static void dtdWriter(String recFolder) {
+    public static void dtdWriter(File recFolder) {
         String dtdOut = 
                 "<!ELEMENT metadata (synedrio+)>" + "\n" +
                 "<!ELEMENT synedrio (speaker, language, seminar, auditorium, keywords, comments, " +
@@ -154,12 +130,11 @@ public class AlisXMLHandler {
                 "<!ELEMENT comments (#PCDATA)>" + "\n" +
                 "<!ELEMENT starttime (#PCDATA)>" + "\n" +
                 "<!ELEMENT stoptime (#PCDATA)>" + "\n";
-        try {
-            BufferedWriter out = new BufferedWriter(new FileWriter(
-                    recFolder + AlisCommons.pathseparator + AlisCommons.dtdMetadata
-                    ));
+        try (var out = new FileWriter(
+                    recFolder.getAbsolutePath() + AlisCommons.pathseparator + AlisCommons.dtdMetadata,
+                    java.nio.charset.StandardCharsets.UTF_8
+                    )) {
             out.write( dtdOut );
-            out.close();
         } catch (IOException ex) {
             ex.printStackTrace();
         }
@@ -178,17 +153,19 @@ public class AlisXMLHandler {
                 "   <starttime>" + startTime + "</starttime>" + "\n" +
                 "   <stoptime>" + stopTime + "</stoptime>" + "\n" +
                 "</synedrio>";
-        try {
-            BufferedWriter out = new BufferedWriter(
-                    new OutputStreamWriter(
-                    new FileOutputStream(xmlFullpath), "UTF8"));
+        try (var out = new OutputStreamWriter(
+                    new FileOutputStream(xmlfile), java.nio.charset.StandardCharsets.UTF_8)) {
             out.write( xmlOut );
-            out.close();
         } catch (IOException ex) {
             ex.printStackTrace();
         }
     }
     
+    /**
+     * pucgenie: FIXME: Unsafe and unnecessary. Use proven-safe libraries...
+     * @param str
+     * @return
+     */
     public static String escapeXML(String str) {
         str = AlisCommons.replaceStr(str, "&", "");
         str = AlisCommons.replaceStr(str, "<", "");

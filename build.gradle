@@ -52,3 +52,7 @@ dependencies {
 test {
 	useJUnitPlatform()
 }
+
+application {
+    mainClass = 'net.alis.recording.AlisRecording'
+}

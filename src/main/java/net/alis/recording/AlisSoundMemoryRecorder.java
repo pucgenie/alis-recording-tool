@@ -67,7 +67,7 @@ public class AlisSoundMemoryRecorder implements Runnable {
     
     private AudioFormat getFormat() {
         AudioFormat.Encoding encoding = AudioFormat.Encoding.PCM_SIGNED;
-        float rate = 44100.0F;
+        float rate = 48000.0F;
         int sampleSize = 16;
         boolean bigEndian = false;
         int channels = 1;

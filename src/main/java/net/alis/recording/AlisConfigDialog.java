@@ -19,6 +19,7 @@
 
 package net.alis.recording;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
@@ -361,7 +362,7 @@ public class AlisConfigDialog extends javax.swing.JDialog {
         String selectedCard = soundCardsList.getSelectedValue().toString();
         
         String command[] = new String [] { 
-            AlisCommons.mainPath + AlisCommons.scriptsPath + AlisCommons.pathseparator + AlisCommons.cardScriptTest,
+            AlisCommons.mainPath.getAbsolutePath() + File.separator + AlisCommons.scriptsPath + AlisCommons.pathseparator + AlisCommons.cardScriptTest,
             AlisProperties.loadProps().getProperty(selectedCard + AlisCommons.cardIDProperty)//,
             //mainPath + scriptsPath + pathseparatAlisPropertiese.wav"
         };
@@ -404,7 +405,7 @@ public class AlisConfigDialog extends javax.swing.JDialog {
     }//GEN-LAST:event_soundCardSpinnerStateChanged
 
     private void detectSoundCardsButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_detectSoundCardsButtonActionPerformed
-        String command = AlisCommons.mainPath + AlisCommons.scriptsPath + AlisCommons.pathseparator + AlisCommons.cardScriptCount;
+        String command = AlisCommons.mainPath.getAbsolutePath() + File.separator + AlisCommons.scriptsPath + AlisCommons.pathseparator + AlisCommons.cardScriptCount;
         try {
             Process child = Runtime.getRuntime().exec(command);
             InputStream in = child.getInputStream();
@@ -422,7 +423,7 @@ public class AlisConfigDialog extends javax.swing.JDialog {
             ex.printStackTrace();
         }
         
-        command = AlisCommons.mainPath + AlisCommons.scriptsPath + AlisCommons.pathseparator + AlisCommons.cardScriptList;
+        command = AlisCommons.mainPath.getAbsolutePath() + File.separator + AlisCommons.scriptsPath + AlisCommons.pathseparator + AlisCommons.cardScriptList;
         try {
             Process child = Runtime.getRuntime().exec(command);
             
